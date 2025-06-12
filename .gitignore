@@ -1,0 +1,11 @@
+env388
+env310
+env309
+testing
+samples
+output
+input
+extracted_audio
+env
+pretrained_models
+*.wav
