@@ -1,4 +1,0 @@
-moviepy==1.0.3
-pysrt
-numpy
-PyQt5
