@@ -32,7 +32,7 @@ cd VideoTranslator
 python gui_launcher.py
 ```
 
-![GUI Screenshot](screenshots/gui_main.png)
+<img src="screenshots/gui_main.png" alt="GUI Screenshot" width="400">
 *GUI Interface with real-time progress tracking*
 
 ### 💻 Command Line Mode
