@@ -1,35 +1,24 @@
 # OmniPlay
 
-**AI-Powered Video Dubbi## OmniPlay Vision: The Future of Media Consumption
+*AI-Powered Video Dubbing OmniPlay Vision: The Future of Media Consumption for all Platforms*
 
-### M#### Enterpris#### Enterprise Applications
-- **Corporate Training**: Multilingual employee onboarding
-- **Webinars & Conferences**: Real-time interpretation
-- **Marketing Content**: Global campaign localization
-- **Customer Support**: Multilingual video tutorials
+## Features
 
-#### Social Impact
-- **Accessibility**: Making content available to global audiences
-- **Education**: Breaking language barriers in online learning
-- **Cultural Exchange**: Promoting cross-cultural understanding
-- **News & Information**: Real-time translation of news content
+### Core Dubbing Capabilities
+- **Audio Extraction**: Advanced vocal separation using Spleeter, Librosa, and FFmpeg
+- **Speech Transcription**: High-accuracy transcription with speaker diarization using Whisper
+- **Voice Cloning**: AI-powered voice synthesis maintaining speaker characteristics  
+- **Multi-Language Dubbing**: Support for 100+ languages via Google Translate
+- **Background Preservation**: Maintains original background music and ambiance
+- **Multi-Track Output**: Creates videos with switchable original/dubbed audio tracks
+- **Subtitle Generation**: Automatic SRT subtitle creation with timing synchronization
 
-## Quick Starts
-- **Corporate Training**: Multilingual employee onboarding
-- **Webinars & Conferences**: Real-time interpretation
-- **Marketing Content**: Global campaign localization
-- **Customer Support**: Multilingual video tutorials
-
-#### Social Impact
-- **Accessibility**: Making content available to global audiences
-- **Education**: Breaking language barriers in online learning
-- **Cultural Exchange**: Promoting cross-cultural understanding
-- **News & Information**: Real-time translation of news content
 
 ## Quick Start
 
-### GUI Mode (Recommended)t
+### GUI Mode (Recommended)
 OmniPlay aims to revolutionize how global audiences consume video content by eliminating language barriers through real-time AI dubbing, while providing creators and platforms with advanced media protection and analytics capabilities.
+<img src="screenshots/gui_main.png" alt="OmniPlay GUI Screenshot" width="400">
 
 ### Phase 1: Current Desktop Engine (Active)
 **What we have now:**
@@ -44,16 +33,7 @@ A complete automated solution for dubbing videos using advanced AI technologies.
 
 ![OmniPlay Pipeline](https://img.shields.io/badge/Pipeline-4%20Steps-blue) ![Python](https://img.shields.io/badge/Python-3.8%20%7C%203.9%20%7C%203.10-green) ![License](https://img.shields.io/badge/License-MIT-yellow) ![Status](https://img.shields.io/badge/Status-Active%20Development-orange)
 
-## Features
 
-### Core Dubbing Capabilities
-- **Audio Extraction**: Advanced vocal separation using Spleeter, Librosa, and FFmpeg
-- **Speech Transcription**: High-accuracy transcription with speaker diarization using Whisper
-- **Voice Cloning**: AI-powered voice synthesis maintaining speaker characteristics  
-- **Multi-Language Dubbing**: Support for 100+ languages via Google Translate
-- **Background Preservation**: Maintains original background music and ambiance
-- **Multi-Track Output**: Creates videos with switchable original/dubbed audio tracks
-- **Subtitle Generation**: Automatic SRT subtitle creation with timing synchronization
 
 
 
@@ -67,7 +47,7 @@ A complete automated solution for dubbing videos using advanced AI technologies.
 - **Customizable UI**: White-label solutions for content providers
 - **Analytics Dashboard**: Detailed usage analytics and performance metrics
 
-## � OmniPlay Vision: The Future of Media Consumption
+## OmniPlay Vision: The Future of Media Consumption
 
 ### Mission Statement
 OmniPlay aims to revolutionize how global audiences consume video content by eliminating language barriers through real-time AI dubbing, while providing creators and platforms with advanced media protection and analytics capabilities.
@@ -114,45 +94,6 @@ OmniPlay aims to revolutionize how global audiences consume video content by eli
 - **White-Label Solutions**: Custom-branded players for enterprises
 - **Advanced Analytics**: AI-powered content insights and recommendations
 
-### Use Cases & Target Markets
-
-#### Entertainment Industry
-- **Streaming Platforms**: Netflix, Disney+, Prime Video integration
-- **Content Creators**: YouTube, TikTok, Twitch real-time dubbing
-- **Film Distributors**: Global release with instant localization
-- **Educational Content**: Online courses in multiple languages
-
-#### 🏢 Enterprise Applications
-- **Corporate Training**: Multilingual employee onboarding
-- **Webinars & Conferences**: Real-time interpretation
-- **Marketing Content**: Global campaign localization
-- **Customer Support**: Multilingual video tutorials
-
-#### 🌍 Social Impact
-- **Accessibility**: Making content available to global audiences
-- **Education**: Breaking language barriers in online learning
-- **Cultural Exchange**: Promoting cross-cultural understanding
-- **News & Information**: Real-time translation of news content
-
-## �🎮 Quick Start
-
-### GUI Mode (Recommended)
-```bash
-cd VideoTranslator
-python gui_launcher.py
-```
-
-<img src="screenshots/gui_main.png" alt="OmniPlay GUI Screenshot" width="400">
-*OmniPlay GUI Interface with real-time progress tracking*
-
-### Command Line Mode
-```bash
-cd VideoTranslator
-python run.py "path/to/your/video.mp4"
-```
-
-![CLI Screenshot](screenshots/cli_output.png)
-*OmniPlay command line interface with detailed logging*
 
 ## System Requirements
 
@@ -255,8 +196,6 @@ pip install -r requirements_cloner.txt
 
 ### 4-Step Automated Process
 
-![Pipeline Flowchart](screenshots/pipeline_flow.png)
-*Complete pipeline from input video to multi-track dubbed output*
 
 #### Step 1: Audio Extraction
 ```
@@ -273,8 +212,7 @@ Output: temp/step1/
 - **Librosa**: Advanced audio analysis and processing  
 - **FFmpeg**: Fallback audio processing
 
-![Audio Separation](screenshots/audio_separation.png)
-*Audio waveform showing vocal separation results*
+
 
 #### Step 2: Speech Transcription
 ```
@@ -308,10 +246,6 @@ Output: temp/step3/
 ```
 
 
-
-![Voice Cloning Process](screenshots/voice_cloning.png)
-*Voice cloning maintaining speaker characteristics across languages*
-
 #### Step 4: Video Assembly
 ```
 Input: Original video + temp/step3/final_mix.wav + temp/step1/input_background.wav
@@ -326,9 +260,6 @@ Output: C:/Dubbed/video_TIMESTAMP/
 - **Track 2**: Dubbed Audio (TTS voices + background mix)
 - **Background Preservation**: Original music and ambiance maintained
 
-
-![Multi-Track Output](screenshots/multi_track_player.png)
-*Media player showing switchable audio tracks*
 
 ## Project Structure
 
