@@ -18,7 +18,7 @@ if platform.system() == "Windows":
 AUDIO_FILE = sys.argv[1] if len(sys.argv) > 1 else "temp/step1/input_vocals.wav"
 OUTPUT_JSON = sys.argv[2] if len(sys.argv) > 2 else "temp/step2/output.json"
 SAMPLES_DIR = "temp/step2/samples"
-WHISPER_MODEL_SIZE = "medium"
+WHISPER_MODEL_SIZE = "large"  # Use a larger model for better accuracy
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 if not os.path.exists(AUDIO_FILE):
@@ -134,7 +134,7 @@ def align(transcript, diarization):
         aligned.append({
             "start": seg_start,
             "end": seg_end,
-            "speaker_id": best_match if best_match else "unknown",
+            "speaker_id": best_match if best_match else "SPEAKER_0",
             "original_text": seg["original_text"],
             "text": seg.get("text", ""),
             "translation_llm": seg.get("translation_llm", ""),

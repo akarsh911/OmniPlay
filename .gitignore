@@ -15,3 +15,5 @@ pretrained_models
 *.mp4
 envf
 start
+release
+ffmpeg

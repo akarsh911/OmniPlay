@@ -14,7 +14,6 @@ import sys
 import shutil
 if platform.system() == "Windows":
     sys.stdout.reconfigure(encoding='utf-8')
-
 class VideoTranslationPipeline:
     def __init__(self, input_video_path):
         self.input_video_path = Path(input_video_path).resolve()
