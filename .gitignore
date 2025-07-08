@@ -1,11 +1,17 @@
 env388
 env310
 env309
+env309_2
+envf
 testing
 samples
 output
 input
+temp
 extracted_audio
 env
 pretrained_models
 *.wav
+*.mp4
+envf
+start

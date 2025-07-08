@@ -3,12 +3,26 @@ import os
 import json
 import soundfile as sf
 import numpy as np
+import sys
+
+# === Check command line arguments ===
+if len(sys.argv) < 2:
+    print("[error] Usage: python v5.py <transcription_json_path>")
+    print("Example: python v5.py input.json")
+    print("Example: python v5.py C:/path/to/transcription.json")
+    sys.exit(1)
 
 # === Config ===
-transcription_json_path = "./input.json"
+transcription_json_path = sys.argv[1]
 samples_folder = "./samples"
 output_folder = "./output_clips"
 final_output_path = "./output/final_mix.wav"
+
+# === Check if input file exists ===
+if not os.path.exists(transcription_json_path):
+    print(f"[error] Transcription file not found: {transcription_json_path}")
+    print("Please ensure your JSON file exists at the specified path.")
+    sys.exit(1)
 
 # === Load JSON with diarized segments ===
 with open(transcription_json_path, "r", encoding="utf-8") as f:
@@ -20,7 +34,7 @@ total_duration = h * 3600 + m * 60 + s
 
 # === Load TTS model ===
 model_name = "tts_models/multilingual/multi-dataset/xtts_v2"
-print("🔄 Loading TTS model...")
+print("[loading] Loading TTS model...")
 tts = TTS(model_name=model_name, progress_bar=True, gpu=True)
 
 # === Ensure folders exist ===
@@ -41,7 +55,7 @@ for i, segment in enumerate(transcription["speech"]):
     emotion = segment.get("emotion", "neutral")
     duration = end - start
 
-    speaker_sample_path = os.path.join(samples_folder, f"speaker{speaker_id}_sample.wav")
+    speaker_sample_path = os.path.join(samples_folder, f"speaker{speaker_id}_full.wav")
     output_clip_path = os.path.join(output_folder, f"clip_{i:02d}_{speaker_id}.wav")
 
     print(f"🎙️ [{i}] Generating: {output_clip_path} | Speaker: {speaker_id} | {duration:.2f}s")
@@ -75,8 +89,8 @@ for i, segment in enumerate(transcription["speech"]):
         final_track[start_index:start_index + target_samples] += audio  # add to mix
 
     except Exception as e:
-        print(f"❌ Error processing segment {i}: {e}")
+        print(f"[error] Error processing segment {i}: {e}")
 
 # === Save final mixed audio ===
 sf.write(final_output_path, final_track, SAMPLE_RATE)
-print(f"\n✅ Final mixed audio saved at: {final_output_path}")
+print(f"\n[success] Final mixed audio saved at: {final_output_path}")

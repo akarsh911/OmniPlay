@@ -1,22 +1,37 @@
 import os
 import json
 import torch
+import sys
 from pydub import AudioSegment
 from datetime import timedelta
 from faster_whisper import WhisperModel
 from pyannote.audio import Pipeline
 
+# === Check command line arguments ===
+if len(sys.argv) < 2:
+    print("[error] Usage: python v3.py <input_audio_path> [output_json_path]", flush=True)
+    print("Example: python v3.py input.wav", flush=True)
+    print("Example: python v3.py input.wav output.json", flush=True)
+    print("Example: python v3.py \"C:/path/to/audio.wav\" \"C:/path/to/output.json\"", flush=True)
+    sys.exit(1)
+
 # ----- Configuration -----
-AUDIO_FILE = "input.wav"
-OUTPUT_JSON = "output.json"
+AUDIO_FILE = sys.argv[1]
+OUTPUT_JSON = sys.argv[2] if len(sys.argv) > 2 else "output.json"
 SAMPLES_DIR = "samples"
 WHISPER_MODEL_SIZE = "medium"
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
+# === Check if input file exists ===
+if not os.path.exists(AUDIO_FILE):
+    print(f"[error] Audio file not found: {AUDIO_FILE}", flush=True)
+    print("Please ensure your audio file exists at the specified path.", flush=True)
+    sys.exit(1)
+
 # -------------------------
 
 def debug(msg):
-    print(f"[DEBUG] {msg}")
+    print(f"[DEBUG] {msg}", flush=True)
 
 # STEP 1: TRANSCRIPTION (Whisper)
 from transformers import M2M100ForConditionalGeneration, M2M100Tokenizer
@@ -135,7 +150,7 @@ def translate_segments(segments, source_lang):
 # MAIN FUNCTION
 def main():
     if not os.path.exists(AUDIO_FILE):
-        print(f"[ERROR] Audio file '{AUDIO_FILE}' not found.")
+        print(f"[ERROR] Audio file '{AUDIO_FILE}' not found.", flush=True)
         return
 
     debug("Starting transcription pipeline...")
@@ -158,7 +173,7 @@ def main():
     # Step 6: Output JSON
     write_output(aligned_segments, total_duration, OUTPUT_JSON)
 
-    debug("✅ All steps complete!")
+    debug("[success] All steps complete!")
 
 if __name__ == "__main__":
     main()

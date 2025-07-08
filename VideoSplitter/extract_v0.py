@@ -8,12 +8,18 @@ import os
 import subprocess
 from pathlib import Path
 import sys
+# import sys
+import platform
+
+if platform.system() == "Windows":
+    sys.stdout.reconfigure(encoding='utf-8')
+
 
 class RobustAudioExtractor:
-    def __init__(self, input_video_path, output_dir="extracted_audio"):
+    def __init__(self, input_video_path, output_dir="temp/step1"):
         self.input_video_path = Path(input_video_path)
         self.output_dir = Path(output_dir)
-        self.output_dir.mkdir(exist_ok=True)
+        self.output_dir.mkdir(parents=True, exist_ok=True)
         
         # Output paths
         self.raw_audio_path = self.output_dir / f"{self.input_video_path.stem}_raw_audio.wav"
@@ -29,26 +35,26 @@ class RobustAudioExtractor:
         try:
             import librosa
             import numpy as np
-            print("✅ Librosa is available")
+            print(" Librosa is available", flush=True)
             return True
         except Exception as e:
-            print(f"⚠️ Librosa not available: {e}")
+            print(f"Librosa not available: {e}", flush=True)
             return False
     
     def _check_spleeter(self):
         """Check if spleeter is available"""
         try:
             import spleeter
-            print("✅ Spleeter is available")
+            print("[passed] Spleeter is available", flush=True)
             return True
         except ImportError:
-            print("⚠️ Spleeter not available")
-            print(ImportError)
+            print("[warning] Spleeter not available", flush=True)
+            print(ImportError, flush=True)
             return False
     
     def extract_audio_ffmpeg(self):
         """Extract audio from video using FFmpeg"""
-        print(f"Extracting audio from {self.input_video_path}...")
+        print(f"🎵 Extracting audio from {self.input_video_path}...", flush=True)
         
         cmd = [
             'ffmpeg', 
@@ -63,19 +69,19 @@ class RobustAudioExtractor:
         
         try:
             result = subprocess.run(cmd, check=True, capture_output=True, text=True)
-            print(f"✅ Audio extracted successfully: {self.raw_audio_path}")
+            print(f"[passed] Audio extracted successfully: {self.raw_audio_path}", flush=True)
             return True
         except subprocess.CalledProcessError as e:
-            print(f"❌ Error extracting audio: {e}")
-            print(f"FFmpeg output: {e.stderr}")
+            print(f"[error] Error extracting audio: {e}", flush=True)
+            print(f"FFmpeg output: {e.stderr}", flush=True)
             return False
         except FileNotFoundError:
-            print("❌ FFmpeg not found. Please install FFmpeg and add it to PATH")
+            print("[error] FFmpeg not found. Please install FFmpeg and add it to PATH", flush=True)
             return False
     
     def separate_vocals_ffmpeg_simple(self):
         """Simple vocal separation using FFmpeg filters"""
-        print("Using FFmpeg-based vocal separation...")
+        print(" Using FFmpeg-based vocal separation...", flush=True)
         
         try:
             # Extract center channel (vocals) - simple karaoke effect
@@ -107,26 +113,26 @@ class RobustAudioExtractor:
                 vocals_size = self.vocals_path.stat().st_size / (1024*1024)
                 background_size = self.background_path.stat().st_size / (1024*1024)
                 
-                print(f"✅ Vocals saved to: {self.vocals_path} ({vocals_size:.2f} MB)")
-                print(f"✅ Background saved to: {self.background_path} ({background_size:.2f} MB)")
+                print(f"[passed] Vocals saved to: {self.vocals_path} ({vocals_size:.2f} MB)", flush=True)
+                print(f"[passed] Background saved to: {self.background_path} ({background_size:.2f} MB)", flush=True)
                 
                 if vocals_size > 0 and background_size > 0:
                     return True
                 else:
-                    print("⚠️ Files created but are empty")
+                    print("[warning] Files created but are empty", flush=True)
                     return False
             else:
-                print("⚠️ Files not created")
+                print("[warning] Files not created", flush=True)
                 return False
             
         except subprocess.CalledProcessError as e:
-            print(f"❌ Error in FFmpeg separation: {e}")
-            print(f"FFmpeg stderr: {e.stderr.decode() if e.stderr else 'No error message'}")
+            print(f"[error] Error in FFmpeg separation: {e}", flush=True)
+            print(f"FFmpeg stderr: {e.stderr.decode() if e.stderr else 'No error message'}", flush=True)
             return False
     
     def separate_vocals_librosa(self):
         """Advanced vocal separation using librosa"""
-        print("Using Librosa for advanced vocal separation...")
+        print(" Using Librosa for advanced vocal separation...", flush=True)
         
         try:
             import librosa
@@ -135,7 +141,7 @@ class RobustAudioExtractor:
             
             # Load audio
             y, sr = librosa.load(str(self.raw_audio_path), sr=None)
-            print(f"Loaded audio: {len(y)} samples at {sr}Hz")
+            print(f" Loaded audio: {len(y)} samples at {sr}Hz", flush=True)
             
             # Use harmonic-percussive separation
             y_harmonic, y_percussive = librosa.effects.hpss(y)
@@ -167,22 +173,21 @@ class RobustAudioExtractor:
             # Convert back to audio
             vocals = librosa.istft(S_foreground * phase, length=len(y))
             background = librosa.istft(S_background * phase, length=len(y))
-            
-            # Save separated audio
+              # Save separated audio
             sf.write(str(self.vocals_path), vocals, sr)
             sf.write(str(self.background_path), background, sr)
             
-            print(f"✅ Vocals saved to: {self.vocals_path}")
-            print(f"✅ Background saved to: {self.background_path}")
+            print(f"[passed] Vocals saved to: {self.vocals_path}", flush=True)
+            print(f"[passed] Background saved to: {self.background_path}", flush=True)
             return True
-            
+        
         except Exception as e:
-            print(f"❌ Error in Librosa separation: {e}")
+            print(f"[error] Error in Librosa separation: {e}", flush=True)
             return False
     
     def separate_vocals_spleeter(self):
         """Professional vocal separation using Spleeter"""
-        print("Using Spleeter for professional vocal separation...")
+        print(" Using Spleeter for professional vocal separation...", flush=True)
         
         try:
             from spleeter.separator import Separator
@@ -194,7 +199,7 @@ class RobustAudioExtractor:
             
             # Load audio properly for spleeter
             waveform, sr = librosa.load(str(self.raw_audio_path), sr=16000, mono=False)
-            print(f"Loaded audio shape: {waveform.shape}, sr: {sr}")
+            print(f" Loaded audio shape: {waveform.shape}, sr: {sr}", flush=True)
             
             # Ensure stereo format for spleeter
             if len(waveform.shape) == 1:
@@ -207,7 +212,7 @@ class RobustAudioExtractor:
                 # Multi-channel, take first two
                 waveform = waveform[:2]
             
-            print(f"Processing audio shape: {waveform.shape}")
+            print(f" Processing audio shape: {waveform.shape}", flush=True)
             
             # Separate - need to transpose for spleeter
             waveform_t = waveform.T
@@ -217,7 +222,7 @@ class RobustAudioExtractor:
             vocals = prediction['vocals']
             background = prediction['accompaniment']
             
-            print(f"Vocals shape: {vocals.shape}, Background shape: {background.shape}")
+            print(f" Vocals shape: {vocals.shape}, Background shape: {background.shape}", flush=True)
             
             # Convert back to original sample rate and save
             if vocals.shape[0] > 0:
@@ -233,50 +238,50 @@ class RobustAudioExtractor:
                 sf.write(str(self.vocals_path), vocals_44k.T, 44100)
                 sf.write(str(self.background_path), background_44k.T, 44100)
                 
-                print(f"✅ Vocals saved to: {self.vocals_path}")
-                print(f"✅ Background saved to: {self.background_path}")
+                print(f"[passed] Vocals saved to: {self.vocals_path}", flush=True)
+                print(f"[passed] Background saved to: {self.background_path}", flush=True)
                 
                 # Verify files were created
                 if self.vocals_path.exists() and self.background_path.exists():
                     vocals_size = self.vocals_path.stat().st_size / (1024*1024)
                     background_size = self.background_path.stat().st_size / (1024*1024)
-                    print(f"   Vocals file size: {vocals_size:.2f} MB")
-                    print(f"   Background file size: {background_size:.2f} MB")
+                    print(f"   Vocals file size: {vocals_size:.2f} MB", flush=True)
+                    print(f"   Background file size: {background_size:.2f} MB", flush=True)
                     
                     if vocals_size > 0 and background_size > 0:
                         return True
                     else:
-                        print("⚠️ Files created but are empty, trying fallback...")
+                        print("[warning] Files created but are empty, trying fallback...", flush=True)
                         return False
                 else:
-                    print("⚠️ Files not created, trying fallback...")
+                    print("[warning] Files not created, trying fallback...", flush=True)
                     return False
             else:
-                print("⚠️ No audio data returned from Spleeter")
+                print("[warning] No audio data returned from Spleeter", flush=True)
                 return False
             
         except Exception as e:
-            print(f"❌ Error in Spleeter separation: {e}")
+            print(f"[error] Error in Spleeter separation: {e}", flush=True)
             import traceback
             traceback.print_exc()
             return False
     
     def separate_vocals_smart(self):
         """Smart vocal separation using best available method"""
-        print("Starting smart vocal separation...")
+        print("Starting smart vocal separation...", flush=True)
         
         # Try methods in order of quality
         if self.has_spleeter:
-            print("🎯 Attempting Spleeter (highest quality)...")
+            print("[trying] Attempting Spleeter (highest quality)...", flush=True)
             if self.separate_vocals_spleeter():
                 return True
         
         if self.has_librosa:
-            print("🎯 Attempting Librosa (good quality)...")
+            print("[trying] Attempting Librosa (good quality)...", flush=True)
             if self.separate_vocals_librosa():
                 return True
         
-        print("🎯 Falling back to FFmpeg (basic quality)...")
+        print("[trying] Falling back to FFmpeg (basic quality)...", flush=True)
         return self.separate_vocals_ffmpeg_simple()
     
     def get_audio_info(self):
@@ -312,63 +317,70 @@ class RobustAudioExtractor:
                         'file_path': str(self.raw_audio_path)
                     }
         except Exception as e:
-            print(f"Could not get audio info: {e}")
+            print(f"Could not get audio info: {e}", flush=True)
         
         return None
     
     def process(self):
         """Run the complete audio extraction process"""
-        print("🚀 Starting robust audio extraction process...")
-        print(f"Input video: {self.input_video_path}")
-        print(f"Output directory: {self.output_dir}")
+        print(" Starting robust audio extraction process...", flush=True)
+        print(f"Input video: {self.input_video_path}", flush=True)
+        print(f"Output directory: {self.output_dir}", flush=True)
         
         # Check if input file exists
         if not self.input_video_path.exists():
-            print(f"❌ Input video file not found: {self.input_video_path}")
+            print(f"[error] Input video file not found: {self.input_video_path}", flush=True)
             return False
         
         # Step 1: Extract audio from video
-        print("\n📤 Step 1: Extracting audio...")
+        print("\nStep 1: Extracting audio...", flush=True)
         if not self.extract_audio_ffmpeg():
             return False
         
         # Step 2: Separate vocals and background
-        print("\n🎵 Step 2: Separating vocals and background...")
+        print("\nStep 2: Separating vocals and background...", flush=True)
         if not self.separate_vocals_smart():
-            print("⚠️ Vocal separation failed, but raw audio is available")
+            print("[warning] Vocal separation failed, but raw audio is available", flush=True)
             # Continue anyway - we can still proceed with raw audio
         
         # Step 3: Display info
-        print("\n📊 Step 3: Audio analysis...")
+        print("\nStep 3: Audio analysis...", flush=True)
         info = self.get_audio_info()
         if info:
-            print("Audio Information:")
+            print("Audio Information:", flush=True)
             for key, value in info.items():
                 if key == 'file_size':
-                    print(f"  {key}: {value:.2f} MB")
+                    print(f"  {key}: {value:.2f} MB", flush=True)
                 elif key == 'duration':
-                    print(f"  {key}: {value:.2f} seconds")
+                    print(f"  {key}: {value:.2f} seconds", flush=True)
                 else:
-                    print(f"  {key}: {value}")
+                    print(f"  {key}: {value}", flush=True)
         
-        print("\n✅ Audio extraction completed successfully!")
-        print(f"📁 Files available in: {self.output_dir}")
+        print("\n[passed] Audio extraction completed successfully!", flush=True)
+        print(f" Files available in: {self.output_dir}", flush=True)
         
         # List generated files
         for file_path in self.output_dir.glob("*.wav"):
             size = file_path.stat().st_size / (1024*1024)
-            print(f"   - {file_path.name} ({size:.2f} MB)")
+            print(f"   - {file_path.name} ({size:.2f} MB)", flush=True)
         
         return True
 
 # Usage example
 if __name__ == "__main__":
-    # Check for input file
-    input_file = "input/input.mp4"
+    # Check command line arguments
+    if len(sys.argv) < 2:
+        print("[error] Usage: python extract_v0.py <input_video_path>", flush=True)
+        print("Example: python extract_v0.py input/input.mp4", flush=True)
+        print("Example: python extract_v0.py C:/path/to/your/video.mp4", flush=True)
+        sys.exit(1)
+    
+    # Get input file from command line argument
+    input_file = sys.argv[1]
     
     if not os.path.exists(input_file):
-        print(f"❌ Input file not found: {input_file}")
-        print("Please ensure your video file is in the correct location.")
+        print(f"[error] Input file not found: {input_file}", flush=True)
+        print("Please ensure your video file exists at the specified path.", flush=True)
         sys.exit(1)
     
     # Initialize and process
@@ -376,6 +388,6 @@ if __name__ == "__main__":
     success = extractor.process()
     
     if success:
-        print("\n🎉 Ready for Step 2: Speech Transcription!")
+        print("\n[comlete] Ready for Step 2: Speech Transcription!", flush=True)
     else:
-        print("\n❌ Process failed. Please check the errors above.")
+        print("\n[error] Process failed. Please check the errors above.", flush=True)

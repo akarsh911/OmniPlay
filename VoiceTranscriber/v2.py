@@ -1,4 +1,5 @@
 import os
+import sys
 import whisper
 import torch
 from pyannote.audio import Pipeline
@@ -23,27 +24,27 @@ class SimpleAudioTranslationPipeline:
             whisper_model (str): Whisper model size
             hf_token (str): HuggingFace token for speaker diarization
         """
-        print("Loading Whisper model...")
+        print("Loading Whisper model...", flush=True)
         self.whisper_model = whisper.load_model(whisper_model)
         
         # Initialize translator
-        print("Initializing translator...")
+        print("Initializing translator...", flush=True)
         self.translator = Translator()
         
         # Initialize speaker diarization
         if hf_token:
             try:
-                print("Loading speaker diarization pipeline...")
+                print("Loading speaker diarization pipeline...", flush=True)
                 self.diarization_pipeline = Pipeline.from_pretrained(
                     "pyannote/speaker-diarization-3.1",
                     use_auth_token=hf_token
                 )
-                print("Speaker diarization ready!")
+                print("Speaker diarization ready!", flush=True)
             except Exception as e:
-                print(f"Speaker diarization failed: {e}")
+                print(f"Speaker diarization failed: {e}", flush=True)
                 self.diarization_pipeline = None
         else:
-            print("Warning: No HuggingFace token provided. Speaker diarization will be disabled.")
+            print("Warning: No HuggingFace token provided. Speaker diarization will be disabled.", flush=True)
             self.diarization_pipeline = None
         
        
@@ -58,7 +59,7 @@ class SimpleAudioTranslationPipeline:
     
     def detect_language(self, audio_file):
         """Detect the language of the audio"""
-        print("Detecting language...")
+        print("Detecting language...", flush=True)
         result = self.whisper_model.transcribe(audio_file, task="transcribe")
         detected_lang = result.get('language', 'unknown')
         
@@ -71,7 +72,7 @@ class SimpleAudioTranslationPipeline:
         }
         
         lang_display = lang_names.get(detected_lang, detected_lang)
-        print(f"Detected language: {lang_display} ({detected_lang})")
+        print(f"Detected language: {lang_display} ({detected_lang})", flush=True)
         return detected_lang
     
     def translate_text(self, text, source_lang='auto', target_lang='en'):
@@ -87,7 +88,7 @@ class SimpleAudioTranslationPipeline:
             translated = self.translator.translate(text, src=source_lang, dest=target_lang)
             return translated.text
         except Exception as e:
-            print(f"Translation error: {e}")
+            print(f"Translation error: {e}", flush=True)
             return text  # Return original text if translation fails
     
     def calculate_speech_rate(self, text, duration):
@@ -103,7 +104,7 @@ class SimpleAudioTranslationPipeline:
         if not self.diarization_pipeline:
             return None
         
-        print("Performing speaker diarization...")
+        print("Performing speaker diarization...", flush=True)
         try:
             diarization = self.diarization_pipeline(audio_file)
             
@@ -117,7 +118,7 @@ class SimpleAudioTranslationPipeline:
             
             return speaker_segments
         except Exception as e:
-            print(f"Speaker diarization error: {e}")
+            print(f"Speaker diarization error: {e}", flush=True)
             return None
     
     def transcribe_segment(self, audio_file, start_time, end_time):
@@ -127,12 +128,12 @@ class SimpleAudioTranslationPipeline:
             result = self.whisper_model.transcribe(audio, task="transcribe")
             return result["text"].strip()
         except Exception as e:
-            print(f"Warning: Could not transcribe segment {start_time}-{end_time}: {e}")
+            print(f"Warning: Could not transcribe segment {start_time}-{end_time}: {e}", flush=True)
             return ""
     
     def transcribe_with_speakers(self, audio_file):
         """Transcribe audio with speaker identification"""
-        print(f"Processing audio file: {audio_file}")
+        print(f"Processing audio file: {audio_file}", flush=True)
         
         # Full transcription
         try:
@@ -169,7 +170,7 @@ class SimpleAudioTranslationPipeline:
                 results['speakers'] = unique_speakers
                 results['speaker_count'] = len(unique_speakers)
                 
-                print(f"Detected {len(unique_speakers)} speakers: {', '.join(unique_speakers)}")
+                print(f"Detected {len(unique_speakers)} speakers: {', '.join(unique_speakers)}", flush=True)
                 
                 for segment in speaker_segments:
                     text = self.transcribe_segment(audio_file, segment['start'], segment['end'])
@@ -185,7 +186,7 @@ class SimpleAudioTranslationPipeline:
                         })
         else:
             # Fallback without speaker identification
-            print("Using Whisper segmentation (no speaker identification)...")
+            print("Using Whisper segmentation (no speaker identification)...", flush=True)
             if full_result.get('segments'):
                 for segment in full_result['segments']:
                     results['segments'].append({
@@ -204,8 +205,8 @@ class SimpleAudioTranslationPipeline:
     
     def process_complete_pipeline(self, audio_file, output_dir="translated_audio", target_language="en"):
         """Complete pipeline: transcribe, translate, and generate TTS audio"""
-        print(f"Starting complete translation pipeline for: {audio_file}")
-        print(f"Available TTS options: {[k for k, v in self.system_tts.items() if v]}")
+        print(f"Starting complete translation pipeline for: {audio_file}", flush=True)
+        print(f"Available TTS options: {[k for k, v in self.system_tts.items() if v]}", flush=True)
         
         # Create output directory
         os.makedirs(output_dir, exist_ok=True)
@@ -214,11 +215,11 @@ class SimpleAudioTranslationPipeline:
         source_language = self.detect_language(audio_file)
         
         # Step 2: Transcribe with speaker identification
-        print("Transcribing audio with speaker identification...")
+        print("Transcribing audio with speaker identification...", flush=True)
         transcription_results = self.transcribe_with_speakers(audio_file)
         
         # Step 3: Translate transcriptions
-        print("Translating transcriptions...")
+        print("Translating transcriptions...", flush=True)
         translated_results = transcription_results.copy()
         
         for segment in translated_results['segments']:
@@ -233,7 +234,7 @@ class SimpleAudioTranslationPipeline:
             segment['target_duration'] = segment['end_time'] - segment['start_time']
         
         # Step 4: Generate translated audio
-        print("Generating translated audio...")
+        print("Generating translated audio...", flush=True)
        
         
       
@@ -256,23 +257,32 @@ class SimpleAudioTranslationPipeline:
 def main():
     """Example usage with simplified pipeline"""
     
+    # === Check command line arguments ===
+    if len(sys.argv) < 2:
+        print("[error] Usage: python v2.py <input_audio_path> [target_language] [output_dir]", flush=True)
+        print("Example: python v2.py extracted_audio/input_vocals.wav", flush=True)
+        print("Example: python v2.py input.wav en translated_output", flush=True)
+        print("Example: python v2.py \"C:/path/to/audio.wav\" hi output_folder", flush=True)
+        sys.exit(1)
+    
     # Configuration
-    AUDIO_FILE = "extracted_audio/input_vocals.wav"  # Updated to match your file
+    AUDIO_FILE = sys.argv[1]
+    TARGET_LANGUAGE = sys.argv[2] if len(sys.argv) > 2 else "en"  # English default
+    OUTPUT_DIR = sys.argv[3] if len(sys.argv) > 3 else "translated_output_v3"
     WHISPER_MODEL = "tiny"  # Options: tiny, base, small, medium, large
     HF_TOKEN = "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"  # Add your HuggingFace token here for speaker diarization
-    OUTPUT_DIR = "translated_output_v3"
-    TARGET_LANGUAGE = "en"  # English
+    
+    # === Check if input file exists ===
+    if not os.path.exists(AUDIO_FILE):
+        print(f"[error] Audio file not found: {AUDIO_FILE}", flush=True)
+        print("Please ensure your audio file exists at the specified path.", flush=True)
+        sys.exit(1)
       
     # Initialize pipeline
     pipeline = SimpleAudioTranslationPipeline(
         whisper_model=WHISPER_MODEL,
         hf_token=HF_TOKEN
     )
-    
-    if not os.path.exists(AUDIO_FILE):
-        print(f"Error: Audio file '{AUDIO_FILE}' not found!")
-        print("Please update the AUDIO_FILE path in the script.")
-        return
     
     try:
         # Run complete pipeline
@@ -282,28 +292,28 @@ def main():
             target_language=TARGET_LANGUAGE
         )
         
-        print("\n" + "="*80)
-        print("🎉 PIPELINE COMPLETED SUCCESSFULLY!")
-        print("="*80)
-        print(f"📁 Results file: {results['results_file']}")
-        print(f"🎵 Final translated audio: {results['final_audio']}")
-        print(f"📊 Generated segments: {results['generated_segments']}")
-        print(f"👥 Total speakers: {results['total_speakers']}")
-        print(f"🌐 Source language: {results['source_language']}")
+        print("\n" + "="*80, flush=True)
+        print("[comlete] PIPELINE COMPLETED SUCCESSFULLY!", flush=True)
+        print("="*80, flush=True)
+        print(f"📁 Results file: {results['results_file']}", flush=True)
+        print(f"🎵 Final translated audio: {results['final_audio']}", flush=True)
+        print(f"📊 Generated segments: {results['generated_segments']}", flush=True)
+        print(f"👥 Total speakers: {results['total_speakers']}", flush=True)
+        print(f"🌐 Source language: {results['source_language']}", flush=True)
         
         if results['final_audio']:
-            print(f"\n✅ Success! Check the '{OUTPUT_DIR}' folder for:")
-            print(f"   • Individual translated segments")
-            print(f"   • Complete translated audio file")
-            print(f"   • Detailed JSON results")
+            print(f"\n[success] Success! Check the '{OUTPUT_DIR}' folder for:", flush=True)
+            print(f"   • Individual translated segments", flush=True)
+            print(f"   • Complete translated audio file", flush=True)
+            print(f"   • Detailed JSON results", flush=True)
         
     except Exception as e:
-        print(f"❌ Pipeline error: {str(e)}")
-        print("\n🔧 Troubleshooting:")
-        print("1. Install missing TTS: pip install edge-tts pyttsx3")
-        print("2. Update protobuf: pip install 'protobuf<4.0.0'")
-        print("3. Get HuggingFace token for speaker diarization")
-        print("4. Ensure audio file exists and is readable")
+        print(f"[error] Pipeline error: {str(e)}", flush=True)
+        print("\n🔧 Troubleshooting:", flush=True)
+        print("1. Install missing TTS: pip install edge-tts pyttsx3", flush=True)
+        print("2. Update protobuf: pip install 'protobuf<4.0.0'", flush=True)
+        print("3. Get HuggingFace token for speaker diarization", flush=True)
+        print("4. Ensure audio file exists and is readable", flush=True)
 
 if __name__ == "__main__":
     main()
